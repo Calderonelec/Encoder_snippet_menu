@@ -1,0 +1,44 @@
+if (encoder_button_long_press()) { //push read
+                ESP_LOGW(TAG, "Entrando a menú desde error de sensores");
+                menu_show();
+                vTaskDelay(pdMS_TO_TICKS(300));
+                decidido = true;
+            }
+
+//menu read
+encoder_reset_position();
+while (editando) {
+
+        encoder_direction_t dir = encoder_get_direction();
+
+if (dir == ENCODER_CW) {
+    if (distancia <= MENU_DISTANCIA_MAX - MENU_DISTANCIA_STEP) {
+        distancia += MENU_DISTANCIA_STEP;
+    } else {
+        distancia = MENU_DISTANCIA_MAX;
+    }
+} else if (dir == ENCODER_CCW) {
+    if (distancia >= MENU_DISTANCIA_MIN + MENU_DISTANCIA_STEP) {
+        distancia -= MENU_DISTANCIA_STEP;
+    } else {
+        distancia = MENU_DISTANCIA_MIN;
+    }
+}
+
+
+//diff entre long press y clicked:
+
+        if (encoder_button_clicked()) {
+            s_config.distancia_mm = distancia;
+            ESP_LOGI(TAG, "Distancia guardada: %lu mm", distancia);
+
+            ssd1306_clear();
+            ssd1306_draw_string_center(24, "GUARDADO!");
+            ssd1306_update();
+            vTaskDelay(pdMS_TO_TICKS(800));
+            editando = false;
+
+        } else if (encoder_button_long_press()) {
+            ESP_LOGI(TAG, "Configuración cancelada");
+            editando = false;
+        }
